@@ -1,3 +1,5 @@
 /venv
 .vscode
 *.pyc
+oscpygpio-0.1
+oscpygpio_*

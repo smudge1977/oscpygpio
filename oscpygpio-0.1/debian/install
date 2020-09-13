@@ -1,0 +1,3 @@
+oscpygpio.conf /etc
+oscpygpio.* opt/oscpygpio
+requirments.txt opt/oscpygpio

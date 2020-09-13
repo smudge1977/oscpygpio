@@ -1,0 +1,4 @@
+include oscpygpio.sh
+include oscpygpio.conf
+#graft adds directories
+global-exclude *.pyc

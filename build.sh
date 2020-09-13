@@ -1,17 +1,11 @@
-sudo chown -R root:root project-1.0/
 
-sudo cp ./project-1.0/src/project/project ./project-1.0/usr/bin/project
+#   Working method....
+#   run these in the folder for the version
+dh_make --indep --createorig   # indep is wrong for this project as it is only for RPI but hay!
 
-find ./project-1.0/DEBIAN -type d | xargs chmod 755
+cp $source\oscpygpio.* .
+cp $source\requirments.txt .
 
-sudo chmod 0775 ./project-1.0/DEBIAN/control
-
-sudo dpkg-deb --build ./project-1.0/
-
-dpkg -i ./project-1.0.deb
-
-
-
-
+debuild -us -uc
 
 

@@ -25,14 +25,13 @@ Be nice to: dispatch gpio_read(pin) seperatly so after inital init compaion will
 
 '''
 
-
 import argparse
-#import math
 import logging
-#import time
+import json
 
 import RPi.GPIO as gpio
 
+# https://python-osc.readthedocs.io/
 from pythonosc import udp_client
 from pythonosc import dispatcher
 from pythonosc import osc_server
@@ -45,25 +44,47 @@ def gpio_read(pin,*args):
   #* b) I am yet to get OSC client working with broadcast addressess
   '''
   logging.info('Get status of pin %i' % pin)
-  client = udp_client.SimpleUDPClient("192.168.0.255", args_dict.get('replyport'), allow_broadcast=True)
+  #* needs a try to catch no file type stuff / no read allowed
+  #* and json pharsing errors.
+  with open(args_dict['config']) as f:
+    conf = json.load(f)
+  client = udp_client.SimpleUDPClient("192.168.0.255", args_dict.get('replyport'), allow_broadcast=True) #* Need to use what it is told from config!
   #* needs to be wrapped in a try!
   gpio.setup(pin, gpio.IN)
   pin_state = gpio.input(pin)
   #* needs to get the commands to send back from the config file.
   if pin_state == 1:
-    value = '%i HIGH' % pin
-    # client.send_message('/style/text/1/6', '%i HIGH' % pin)
-    # client.send_message('/press/bank/1/6', 0) # sets the button - works
-    # client.send_message('/style/bgcolor/1/6', [20,20,20])
-    # client.send_message('/style/color/1/6', [180,180,180])
+    try:
+      actions = conf['pins'][str(pin)]['HIGH']
+    except KeyError:
+      logging.info('No pin config for pin: %i' % pin)
+    else:
+      logging.info(str('actions to perform : {}'.format(actions)))
+      for action in actions:
+        print(action['path'])
+        print(action['value'])
+        #* validate the value if setting a colour would be a good idea!
+        client.send_message(action['path'], action['value'])
+        logging.info(str('sendresponse: to: {} value: {}'.format(action['path'], action['value'])))
+
   elif pin_state == 0:
-    value = '%i LOW' % pin
-    # client.send_message('/style/text/1/6', '%i LOW' % pin)
+    try:
+      actions = conf['pins'][str(pin)]['LOW']
+    except KeyError:
+      logging.info('No pin config for pin: %i' % pin)
+    else:
+      logging.info(str('actions to perform : {}'.format(actions)))
+      for action in actions:
+        print(action['path'])
+        print(action['value'])
+        #* validate the value if setting a colour would be a good idea!
+        client.send_message(action['path'], action['value'])
+        logging.info(str('sendresponse: to: {} value: {}'.format(action['path'], action['value'])))
+
   else:
     logging.critical(str('pin: "{}", pin_state: "{}", message: "UNKOWN STATE!! "'.format(pin, pin_state)))
-  destination = '/style/text/1/6'
-  client.send_message(destination, value)
-  logging.info(str('response sent to: "{}", value: "{}"'.format(destination, value)))
+
+
 
 def gpio_set(*args):
   # who did we get dispatcher by?
@@ -84,6 +105,7 @@ def gpio_set(*args):
   #* the then means companion STATE gets updated to reflect real world
   gpio_read(pin)       
 
+
 if __name__ == "__main__":
   # What things have we been told on the command line?
   parser = argparse.ArgumentParser()
@@ -95,7 +117,7 @@ if __name__ == "__main__":
     help='Companion control port - not really any point to this switch as companion has a fixed listen port')
   parser.add_argument('--companion', default='192.168.0.81',
     help='Companion IP - this is for sending back the OSC to give feed back #* would be nice to know the source of the OSC and just send back to that rather than specify')
-  parser.add_argument('--config', default='oscpygpio.conf', 
+  parser.add_argument('--config', default='oscpygpio-0.1/oscpygpio.conf', 
     help='config from a file - #* too be implemented')
   parser.add_argument('--log', default='DEBUG',
     help='Set log level i.e. DEBUG or INFO - INFO would seem sencible for normal systemctl running')

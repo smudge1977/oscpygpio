@@ -51,15 +51,19 @@ def gpio_read(pin,*args):
   pin_state = gpio.input(pin)
   #* needs to get the commands to send back from the config file.
   if pin_state == 1:
-    client.send_message('/style/text/1/6', '%i HIGH' % pin)
+    value = '%i HIGH' % pin
+    # client.send_message('/style/text/1/6', '%i HIGH' % pin)
     # client.send_message('/press/bank/1/6', 0) # sets the button - works
     # client.send_message('/style/bgcolor/1/6', [20,20,20])
     # client.send_message('/style/color/1/6', [180,180,180])
   elif pin_state == 0:
-    client.send_message('/style/text/1/6', '%i LOW' % pin)
-    pass
+    value = '%i LOW' % pin
+    # client.send_message('/style/text/1/6', '%i LOW' % pin)
   else:
     logging.critical(str('pin: "{}", pin_state: "{}", message: "UNKOWN STATE!! "'.format(pin, pin_state)))
+  destination = '/style/text/1/6'
+  client.send_message(destination, value)
+  logging.info(str('response sent to: "{}", value: "{}"'.format(destination, value)))
 
 def gpio_set(*args):
   # who did we get dispatcher by?

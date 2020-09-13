@@ -1,0 +1,4 @@
+pigpio==1.46
+pkg-resources==0.0.0
+python-osc==1.7.4
+RPi.GPIO==0.7.0

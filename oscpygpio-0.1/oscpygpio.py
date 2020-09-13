@@ -16,6 +16,9 @@ Dependancies:
 
 Need to: read response actions from config file
 
+Good to: Listen on both broadcast and unicast - send response to jsut unicast 
+  - event driven status updates will fix other companion instances been aware
+
 Be nice to: makefile to install as a service etc. and then make into a deb package
 
 Be nice to: dispatch gpio_read(pin) seperatly so after inital init compaion will follow actual pin states
